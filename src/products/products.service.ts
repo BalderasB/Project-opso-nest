@@ -10,25 +10,26 @@ export class ProductsService {
       productId: uuid(),
       productName: "Sabritas Adobadas 48g",
       price: 19,
-      counstSeal: 3,
+      countSeal: 3,
       provider: uuid(),
     },
     {
       productId: uuid(),
       productName: "Gatorade Frutas 600ml",
       price:35,
-      counstSeal: 2,
+      countSeal: 2,
       provider: uuid()
     },
     {
       productId: uuid(),
       productName: "Agua Ciel 1L",
       price: 15,
-      counstSeal: 0,
+      countSeal: 0,
       provider: uuid()
     }
   ]
   create(createProductDto: CreateProductDto) {
+    if (!createProductDto.productId) createProductDto.productId = uuid()
     createProductDto.productId = uuid();
     this.products.push(createProductDto)
     return createProductDto;
@@ -52,13 +53,25 @@ export class ProductsService {
 
 
   update(id: string, updateProductDto: UpdateProductDto) {
-    let product = this.findOne(id)
-    product = {
-      ...product,
-      ...updateProductDto,
+    let updatedProduct: any = null;
+    
+    this.products = this.products.map((product) => {
+        if (product.productId === id) {            
+            updatedProduct = {
+                ...product,
+                ...updateProductDto,
+            };
+            return updatedProduct;
+        }
+        return product;
+    });
+    
+    if (!updatedProduct) {
+        throw new Error(`Product with ID ${id} not found`);
     }
-    return product
-  }
+
+    return updatedProduct;
+}
 
   remove(id: string) {
     const { productId } = this.findOne(id)
