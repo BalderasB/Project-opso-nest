@@ -14,12 +14,12 @@ import { ConfigModule } from '@nestjs/config';
       host: process.env.host,
       port: Number(process.env.DB_PORT),
       username: 'postgres',
-      password: 'TheBestPassword', 
+      password: process.env.pass, 
       database: process.env.name,  // Aquí se usa la variable del .env
       entities: [],
       autoLoadEntities: true,
       synchronize: true,
-    })
+    }), EmployeesModule, ProductsModule
     
   ],
 })
