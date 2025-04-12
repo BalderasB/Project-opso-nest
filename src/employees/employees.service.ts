@@ -14,12 +14,20 @@ export class EmployeesService {
   ){}
   
   async create(createEmployeeDto: CreateEmployeeDto) {
-    const employee = this.employeeRepository.save(createEmployeeDto)
+    const employee = await this.employeeRepository.save(createEmployeeDto)
     return employee;
   }
 
   findAll() {
     return this.employeeRepository.find()
+  }
+
+  findByLocation(id: number) {
+    return this.employeeRepository.findBy({
+      location: {
+        locationId: id
+      }
+    })
   }
 
   findOne(id: string) {
@@ -31,18 +39,16 @@ export class EmployeesService {
 
   async update(id: string, updateEmployeeDto: UpdateEmployeeDto) {
     const employeeToUpdate = await this.employeeRepository.preload({
-        employeeId: id,
-        ...updateEmployeeDto
+      employeeId: id,
+      ...updateEmployeeDto
     });
 
     if (!employeeToUpdate) {
-        throw new Error("Employee not found"); // Manejo de error si el empleado no existe
+      throw new NotFoundException(`Empleado con ID ${id} no encontrado`);
     }
 
-    await this.employeeRepository.save(employeeToUpdate); // Agregado await para guardar correctamente
-
-    return employeeToUpdate;
-}
+    return this.employeeRepository.save(employeeToUpdate);
+  }
 
 
   remove(id: string) {

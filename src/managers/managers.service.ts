@@ -30,10 +30,14 @@ export class ManagersService {
   async update(id: string, updateManagerDto: UpdateManagerDto) {
     const managerToUpdate = await this.managerRepository.preload({
       managerId: id,
-      ...UpdateManagerDto
+      ...updateManagerDto
     })
-    return this.managerRepository.save(managerToUpdate )
+    if (!managerToUpdate) {
+      throw new NotFoundException(`Manager with ID ${id} not found`);
+    }
+    return this.managerRepository.save(managerToUpdate)
   }
+
 
   remove(id: string) {
     return this.managerRepository.delete({

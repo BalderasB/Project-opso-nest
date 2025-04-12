@@ -1,43 +1,55 @@
-
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+
 import { CreateLocationDto } from './dto/create-location.dto';
 import { UpdateLocationDto } from './dto/update-location.dto';
-import { Repository } from 'typeorm';
-import { InjectRepository } from '@nestjs/typeorm';
+import { Location } from './entities/location.entity';
+import { plainToInstance } from 'class-transformer';
 
 @Injectable()
-export class LocationsService{
+export class LocationsService {
   constructor(
     @InjectRepository(Location)
-    private locationRepository: Repository<Location>
-  ){}
-  create(createLocationDto: CreateLocationDto){
-    return this.locationRepository.save(createLocationDto);
-  }  
+    private readonly locationRepository: Repository<Location>,
+  ) {}
 
-  findAll() {
-    return this.locationRepository.find()
+  async create(createLocationDto: CreateLocationDto) {
+    const location = plainToInstance(Location, createLocationDto);
+    return await this.locationRepository.save(location);
   }
 
-  findOne(id: number) {
-    const location = this.locationRepository.findOneBy({
+  async findAll() {
+    return await this.locationRepository.find();
+  }
+
+  async findOne(id: number) {
+    const location = await this.locationRepository.findOneBy({
       locationId: id,
-    })
-    if (!location) throw new NotFoundException("Location not found")
+    });
+
+    if (!location) {
+      throw new NotFoundException('Location not found');
+    }
+
+    return location;
   }
 
-  update(id: number, updateLocationDto: UpdateLocationDto) {
-    const location= this.locationRepository.preload({
+  async update(id: number, updateLocationDto: UpdateLocationDto) {
+    const location = await this.locationRepository.preload({
       locationId: id,
       ...updateLocationDto,
-    })
-    return location
+    });
+
+    if (!location) {
+      throw new NotFoundException('Location not found');
+    }
+
+    return await this.locationRepository.save(location);
   }
 
-  remove(id: number) {
-    return this.locationRepository.delete({
-      locationId: id,
-    })
+  async remove(id: number) {
+    const location = await this.findOne(id);
+    return await this.locationRepository.remove(location);
   }
 }
-  
